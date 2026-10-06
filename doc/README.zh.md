@@ -1,92 +1,68 @@
+最後更新：2026-10-06
+
 > [!NOTE]
-> 此 README 由 [SKILL](https://github.com/pardnchiu/skill-readme-generate) 生成，英文版請參閱 [這裡](../README.md)。
+> 此 README 由 [SKILL](https://github.com/agenvoy/skill-readme-generate) 生成，英文版請參閱 [這裡](../README.md)。
 
-# go-podrun
+***
 
-[![pkg](https://pkg.go.dev/badge/github.com/pardnchiu/go-podrun.svg)](https://pkg.go.dev/github.com/pardnchiu/go-podrun)
-[![card](https://goreportcard.com/badge/github.com/pardnchiu/go-podrun)](https://goreportcard.com/report/github.com/pardnchiu/go-podrun)
-[![license](https://img.shields.io/github/license/pardnchiu/go-podrun)](../LICENSE)
-[![version](https://img.shields.io/github/v/tag/pardnchiu/go-podrun?label=release)](https://github.com/pardnchiu/go-podrun/releases)
+<p align="center">
+<strong>DEPLOY TO REMOTE PODMAN AND K3S LIKE LOCAL DOCKER COMPOSE!</strong>
+</p>
 
-> 一個 CLI 工具，透過 rsync/SSH 將本地專案同步至遠端伺服器並執行 Podman Compose 工作負載，同時使用本地 SQLite 資料庫追蹤容器部署生命週期。
+<p align="center">
+<a href="https://github.com/pardnchiu/PodRun/releases"><img src="https://img.shields.io/github/v/tag/pardnchiu/PodRun?include_prereleases&style=for-the-badge" alt="Release"></a>
+<a href="../LICENSE"><img src="https://img.shields.io/github/license/pardnchiu/PodRun?include_prereleases&style=for-the-badge" alt="License"></a>
+</p>
+
+***
+
+> Go CLI 工具，像在本地執行 docker compose 一樣將專案部署到遠端 Podman 與 k3s
 
 ## 目錄
 
-- [功能特色](#功能特色)
+- [功能特點](#功能特點)
 - [架構](#架構)
-- [目錄結構](#目錄結構)
 - [授權](#授權)
-- [作者](#作者)
+- [Author](#author)
 
-## 功能特色
+## 功能特點
 
-### 基於 UID 的部署登錄簿
+> `go install github.com/pardnchiu/PodRun/cmd/cli@latest` · [完整文件](./doc.zh.md)
 
-每個容器部署皆分配一組由本機 MAC 地址與專案路徑雜湊衍生的唯一識別碼，並持久化於本地 SQLite 資料庫。狀態查詢不依賴容器 runtime 的可用性，即使容器已停止，仍可追蹤 `starting → running → failed → removed` 完整生命週期。
+- **一行指令遠端部署** — 在本地專案目錄以 docker compose 相同語法執行，自動同步檔案並在遠端以 Podman Compose 啟動，遠端只需 SSH 與 Podman。
+- **同步前差異預覽** — 遠端目錄已有內容時先以 rsync dry-run 列出將被新增、覆寫或刪除的檔案，確認後才實際同步。
+- **不動原檔的 Compose 改寫** — 在遠端產生 `docker-compose.podrun.yml` 副本，移除主機 Port 綁定並為相對路徑 Volume 補上 SELinux `:z` 標籤。
+- **雙 Runtime 目標（k3s 未完成）** — 以 `--type` 在 Podman Compose 與 k3s 之間切換，同一套指令部署至兩種環境；k3s 為後續實作項目，目前僅 Podman Compose 可用。
+- **可追蹤的部署紀錄** — 以本機 MAC 位址與專案絕對路徑雜湊出固定 UID 與遠端目錄，並由內建 Gin + SQLite API Server 記錄每次操作與來源主機。
 
-### 雙 Runtime 目標切換
-
-同一 CLI 指令可透過 `--type` 旗標切換至 Podman Compose（Rootless 容器工作負載）或 k3s（Kubernetes 語意環境），無需維護兩套獨立的部署工具鏈。
-
-### SSH/rsync 零安裝遠端執行
-
-本地專案檔案透過 rsync 同步至遠端伺服器，並以 `sshpass` 搭配 SSH 執行 compose 指令。遠端目標機器無需安裝任何額外 CLI 工具，僅需具備 SSH 存取權限與容器 runtime。
-
-> **安裝**
-> ```bash
-> go install github.com/pardnchiu/go-podrun/cmd/cli@latest
-> ```
-
-完整文件 → [doc.zh.md](doc.zh.md)
+> k3s Runtime、Kubernetes `deploy`、`export`、`domain` 等規劃項目尚未完成，完整狀態見 [實作狀態](./doc.zh.md#實作狀態)。
 
 ## 架構
 
+> [完整架構](./architecture.zh.md)
+
 ```mermaid
 graph LR
-    CLI["CLI (本地)"] -->|rsync + SSH| Remote["遠端伺服器"]
-    CLI -->|HTTP POST| API["API Server :8080"]
-    API -->|SQLite| DB[(部署登錄簿)]
-    Remote -->|Podman Compose| C["Containers"]
-    Remote -->|k3s| K["Pods"]
-```
-
-## 目錄結構
-
-```
-go-podrun/
-├── cmd/
-│   ├── api/main.go          # API server 入口
-│   └── cli/main.go          # CLI 入口
-├── internal/
-│   ├── command/             # CLI 部署邏輯
-│   ├── database/            # SQLite 操作
-│   ├── handler/             # HTTP 路由處理器
-│   ├── model/               # Pod / Record 型別
-│   └── utils/               # SSH、env、IP 輔助函式
-├── sql/create.sql           # Schema DDL
-└── go.mod
+    CLI[podrun CLI] -->|rsync over SSH| Remote[遠端主機]
+    CLI -->|SSH 指令| Remote
+    Remote --> Compose[Podman Compose]
+    Remote -.->|未完成| K3s[k3s]
+    CLI -->|HTTP :8080| API[API Server]
+    API --> DB[(SQLite)]
 ```
 
 ## 授權
 
-本專案採用 [GNU Affero General Public License v3.0](../LICENSE) 授權。
+本專案採用 [AGPL-3.0 LICENSE](../LICENSE)。
 
-## 作者
+## Author
 
-<img src="https://avatars.githubusercontent.com/u/25631760" align="left" width="96" height="96" style="margin-right: 0.5rem;">
+Just [open an issue](https://github.com/pardnchiu/PodRun/issues/new) to share an idea.
 
-<h4 style="padding-top: 0">邱敬幃 Pardn Chiu</h4>
-
-<a href="mailto:dev@pardn.io" target="_blank">
-<img src="https://pardn.io/image/email.svg" width="48" height="48">
-</a> <a href="https://linkedin.com/in/pardnchiu" target="_blank">
-<img src="https://pardn.io/image/linkedin.svg" width="48" height="48">
+<a href="https://github.com/pardnchiu/PodRun/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=pardnchiu/PodRun&cache_bust=2026-10-06" alt="PodRun contributors" />
 </a>
 
-## Stars
+***
 
-[![Star History](https://starchart.cc/pardnchiu/go-podrun.svg)](https://starchart.cc/pardnchiu/go-podrun)
-
----
-
-©️ 2025 [pardnchiu](https://github.com/pardnchiu)
+©️ 2025 [邱敬幃 Pardn Chiu](https://www.linkedin.com/in/pardnchiu)

@@ -7,3 +7,6 @@
 # template hidden
 podrun.md
 sh/*
+
+.doc/
+wiki-worker/
