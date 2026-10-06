@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 
 	"github.com/joho/godotenv"
-	"github.com/pardnchiu/go-podrun/internal/database"
-	"github.com/pardnchiu/go-podrun/internal/handler"
+	"github.com/pardnchiu/PodRun/internal/database"
+	"github.com/pardnchiu/PodRun/internal/handler"
 )
 
 func init() {

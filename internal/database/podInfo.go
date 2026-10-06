@@ -3,7 +3,7 @@ package database
 import (
 	"context"
 
-	"github.com/pardnchiu/go-podrun/internal/model"
+	"github.com/pardnchiu/PodRun/internal/model"
 )
 
 func (s *SQLite) PodInfo(ctx context.Context, uid string) (*model.Pod, error) {

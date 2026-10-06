@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/pardnchiu/go-podrun/internal/utils"
+	"github.com/pardnchiu/PodRun/internal/utils"
 )
 
 func New() (*PodmanArg, error) {

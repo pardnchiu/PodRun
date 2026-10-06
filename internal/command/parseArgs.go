@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/pardnchiu/go-podrun/internal/utils"
+	"github.com/pardnchiu/PodRun/internal/utils"
 )
 
 type PodmanArg struct {

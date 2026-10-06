@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pardnchiu/go-podrun/internal/database"
-	"github.com/pardnchiu/go-podrun/internal/utils"
+	"github.com/pardnchiu/PodRun/internal/database"
+	"github.com/pardnchiu/PodRun/internal/utils"
 )
 
 var (

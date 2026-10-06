@@ -4,7 +4,7 @@ import (
 	"context"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/pardnchiu/go-podrun/internal/model"
+	"github.com/pardnchiu/PodRun/internal/model"
 )
 
 func (s *SQLite) InsertRecord(ctx context.Context, d *model.Record) error {

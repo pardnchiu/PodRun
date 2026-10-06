@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/pardnchiu/go-podrun/internal/model"
-	"github.com/pardnchiu/go-podrun/internal/utils"
+	"github.com/pardnchiu/PodRun/internal/model"
+	"github.com/pardnchiu/PodRun/internal/utils"
 )
 
 const (
@@ -362,7 +362,7 @@ func upsertPod(d *model.Pod) error {
 	}
 
 	resp, err := http.Post(
-		"http://localhost:8080/pod/upsert",
+		"http://localhost:8080/api/pod/upsert",
 		"application/json",
 		bytes.NewBuffer(jsonData),
 	)
@@ -389,7 +389,7 @@ func removePod(uid string) {
 	}
 
 	resp, err := http.Post(
-		"http://localhost:8080/pod/update/"+uid,
+		"http://localhost:8080/api/pod/update/"+uid,
 		"application/json",
 		bytes.NewBuffer(jsonData),
 	)
@@ -419,7 +419,7 @@ func recordPod(d *model.Pod, content string) error {
 	}
 
 	resp, err := http.Post(
-		"http://localhost:8080/pod/record/insert",
+		"http://localhost:8080/api/pod/record/insert",
 		"application/json",
 		bytes.NewBuffer(jsonData),
 	)

@@ -1,4 +1,4 @@
-module github.com/pardnchiu/go-podrun
+module github.com/pardnchiu/PodRun
 
 go 1.25.1
 

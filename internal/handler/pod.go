@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pardnchiu/go-podrun/internal/model"
+	"github.com/pardnchiu/PodRun/internal/model"
 )
 
 func getAPIPodList(ctx *gin.Context) {

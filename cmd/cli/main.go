@@ -5,8 +5,8 @@ import (
 	"log/slog"
 
 	"github.com/joho/godotenv"
-	"github.com/pardnchiu/go-podrun/internal/command"
-	"github.com/pardnchiu/go-podrun/internal/utils"
+	"github.com/pardnchiu/PodRun/internal/command"
+	"github.com/pardnchiu/PodRun/internal/utils"
 )
 
 func init() {
